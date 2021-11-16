@@ -70,11 +70,23 @@ public class DayView extends AppCompatActivity {
 
     private LinearLayout ll;
 
-    private ArrayList<EditText> etCollection = new ArrayList<EditText>();
+    //Refactoring: Major code smell: Removed unused etCollection variable.
+    //private ArrayList<EditText> etCollection = new ArrayList<EditText>();
 
     private ArrayList<Button> saveCollection = new ArrayList<Button>();
 
     private ArrayList<Button> removeCollection = new ArrayList<Button>();
+
+    private LinearLayout ll_h1;
+    private LinearLayout ll_h2;
+    private LinearLayout ll_v1;
+    private LinearLayout ll_v2;
+    private LinearLayout.LayoutParams lp;
+    private EditText et;
+    private EditText tm;
+    private CheckBox chckbx;
+    private Button b;
+    private Button b_1;
 
 
     @Override
@@ -86,7 +98,8 @@ public class DayView extends AppCompatActivity {
 
         ll = findViewById(R.id.l_list);
 
-        String[] month_names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        //Refactoring: Minor code smell: Renamed variable month_names to match naming style.
+        String[] monthNames = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
         Bundle extras = getIntent().getExtras();
         year = extras.getString("YEAR");
@@ -101,7 +114,7 @@ public class DayView extends AppCompatActivity {
 
         for(int i = 1; i <= 12; i++) {
             if(temp == i)
-                monthDisplay = month_names[i];
+                monthDisplay = monthNames[i];
         }
 
         TextView textView = findViewById(R.id.textView4);
@@ -115,32 +128,17 @@ public class DayView extends AppCompatActivity {
             sqLiteDatabase.execSQL("CREATE TABLE RemindersV4 (ID INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, Time TEXT, Event TEXT, Status INTEGER DEFAULT 0)");
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //Refactoring: Switch printing stack trace to logging as error.
+            Log.e(e.toString());
         }
 
         ReadDatabase();
     }
 
-    public void AddReminder(View view) {
+    //Refactoring: Minor code smell: Renamed method AddReminder to match naming style.
+    public void addReminder(View view) {
 
-        LinearLayout ll_h1 = new LinearLayout(this);
-        LinearLayout ll_h2 = new LinearLayout(this);
-        LinearLayout ll_v1 = new LinearLayout(this);
-        LinearLayout ll_v2 = new LinearLayout(this);
-
-        ll_h1.setOrientation(ll_h1.HORIZONTAL);
-        ll_h2.setOrientation(ll_h2.HORIZONTAL);
-        ll_v1.setOrientation(ll_v1.VERTICAL);
-        ll_v2.setOrientation(ll_v2.VERTICAL);
-
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(590, 110);
-
-        EditText et = new EditText(this);
-        EditText tm = new EditText(this);
-        CheckBox chckbx = new CheckBox(this);
-        Button b = new Button(this);
-        Button b_1 = new Button(this);
-
+        initiateReminder();
         String query = "SELECT COUNT(*) FROM RemindersV4 WHERE Date=" + selectedDate;
 
         Integer nid = (int)DatabaseUtils.longForQuery(sqLiteDatabase, query, null);
@@ -327,37 +325,42 @@ public class DayView extends AppCompatActivity {
 
             for (int i = 0; i < cursor.getCount(); i++) {
 
-                AddReminder(i, cursor.getString(cursor.getColumnIndex("Event")), cursor.getString(cursor.getColumnIndex("Time")), cursor.getInt(cursor.getColumnIndex("Status")));
-                Integer statval = cursor.getInt(cursor.getColumnIndex("Status"));
+                addReminder(i, cursor.getString(cursor.getColumnIndex("Event")), cursor.getString(cursor.getColumnIndex("Time")), cursor.getInt(cursor.getColumnIndex("Status")));
+                //Refactoring: Major code smell: Removing unused assignment statval
+                //Integer statval = cursor.getInt(cursor.getColumnIndex("Status"));
                 cursor.moveToNext();
             }
 
             cursor.close();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //Refactoring: Switch printing stack trace to logging as error.
+            Log.e(e.toString());
         }
     }
 
-    public void AddReminder(Integer RowNumber, String event_txt, String time_txt, Integer status) {
-
-        LinearLayout ll_h1 = new LinearLayout(this);
-        LinearLayout ll_h2 = new LinearLayout(this);
-        LinearLayout ll_v1 = new LinearLayout(this);
-        LinearLayout ll_v2 = new LinearLayout(this);
+    public void initiateReminder(){
+        ll_h1 = new LinearLayout(this);
+        ll_h2 = new LinearLayout(this);
+        ll_v1 = new LinearLayout(this);
+        ll_v2 = new LinearLayout(this);
 
         ll_h1.setOrientation(ll_h1.HORIZONTAL);
         ll_h2.setOrientation(ll_h2.HORIZONTAL);
         ll_v1.setOrientation(ll_v1.VERTICAL);
         ll_v2.setOrientation(ll_v2.VERTICAL);
 
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(590, 110);
+        lp = new LinearLayout.LayoutParams(590, 110);
 
-        EditText et = new EditText(this);
-        EditText tm = new EditText(this);
-        CheckBox chckbx = new CheckBox(this);
-        Button b = new Button(this);
-        Button b_1 = new Button(this);
+        et = new EditText(this);
+        tm = new EditText(this);
+        chckbx = new CheckBox(this);
+        b = new Button(this);
+        b_1 = new Button(this);
+    }
+    public void AddReminder(Integer RowNumber, String event_txt, String time_txt, Integer status) {
+
+        initiateReminder();
 
         Drawable buttonDrawable = b.getBackground();
         buttonDrawable = DrawableCompat.wrap(buttonDrawable);
